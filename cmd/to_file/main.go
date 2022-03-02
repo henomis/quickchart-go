@@ -1,6 +1,8 @@
 package main
 
 import (
+	"os"
+
 	quickchartgo "github.com/henomis/quickchart-go"
 )
 
@@ -20,9 +22,12 @@ func main() {
 	qc := quickchartgo.New()
 	qc.Config = chartConfig
 
-	err := qc.ToFile("pippo.png")
+	file, err := os.Create("output.png")
 	if err != nil {
 		panic(err)
 	}
+
+	defer file.Close()
+	qc.Write(file)
 
 }

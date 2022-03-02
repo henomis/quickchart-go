@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -21,14 +22,15 @@ type QuickChart struct {
 	Version           string  `json:"version"`
 	Config            string  `json:"chart"`
 
-	Scheme string `json:"-"`
-	Host   string `json:"-"`
-	Port   int64  `json:"-"`
+	Scheme  string        `json:"-"`
+	Host    string        `json:"-"`
+	Port    int64         `json:"-"`
+	Timeout time.Duration `json:"-"`
 }
 
 type getShortURLResponse struct {
 	Success bool   `json:"-"`
-	URL     string `json:"url`
+	URL     string `json:"url"`
 }
 
 func New() *QuickChart {
@@ -39,15 +41,16 @@ func New() *QuickChart {
 		Format:            "png",
 		BackgroundColor:   "transparent",
 
-		Scheme: "https",
-		Host:   "quickchart.io",
-		Port:   443,
+		Scheme:  "https",
+		Host:    "quickchart.io",
+		Port:    443,
+		Timeout: 10 * time.Second,
 	}
 }
 
 func (qc *QuickChart) GetUrl() (string, error) {
 
-	if len(qc.Config) == 0 {
+	if !qc.validateConfig() {
 		return "", fmt.Errorf("invalid config")
 	}
 
@@ -74,36 +77,18 @@ func (qc *QuickChart) GetUrl() (string, error) {
 
 func (qc *QuickChart) GetShortUrl() (string, error) {
 
-	if len(qc.Config) == 0 {
+	if !qc.validateConfig() {
 		return "", fmt.Errorf("invalid config")
 	}
 
 	quickChartURL := fmt.Sprintf("%s://%s:%d/chart/create", qc.Scheme, qc.Host, qc.Port)
-
-	jsonEncodedPayload, err := json.Marshal(qc)
+	bodyStream, err := qc.makePostRequest(quickChartURL)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("makePostRequest(%s): %w", quickChartURL, err)
 	}
 
-	httpClient := &http.Client{
-		Timeout: 10 * time.Second,
-	}
-
-	resp, err := httpClient.Post(
-		quickChartURL,
-		"application/json",
-		bytes.NewBuffer(jsonEncodedPayload),
-	)
-	if err != nil {
-		return "", err
-	}
-
-	if resp.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("response error: %d", resp.StatusCode)
-	}
-
-	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
+	defer bodyStream.Close()
+	body, err := ioutil.ReadAll(bodyStream)
 	if err != nil {
 		return "", err
 	}
@@ -123,12 +108,25 @@ func (qc *QuickChart) GetShortUrl() (string, error) {
 
 }
 
-func (qc *QuickChart) ToByteArray() ([]byte, error) {
-	if len(qc.Config) == 0 {
-		return nil, fmt.Errorf("invalid config")
+func (qc *QuickChart) Write(output io.Writer) error {
+
+	if !qc.validateConfig() {
+		return fmt.Errorf("invalid config")
 	}
 
 	quickChartURL := fmt.Sprintf("%s://%s:%d/chart", qc.Scheme, qc.Host, qc.Port)
+	bodyStream, err := qc.makePostRequest(quickChartURL)
+	if err != nil {
+		return fmt.Errorf("makePostRequest(%s): %w", quickChartURL, err)
+	}
+
+	defer bodyStream.Close()
+	_, err = io.Copy(output, bodyStream)
+
+	return err
+}
+
+func (qc *QuickChart) makePostRequest(endpoint string) (io.ReadCloser, error) {
 
 	jsonEncodedPayload, err := json.Marshal(qc)
 	if err != nil {
@@ -136,11 +134,11 @@ func (qc *QuickChart) ToByteArray() ([]byte, error) {
 	}
 
 	httpClient := &http.Client{
-		Timeout: 10 * time.Second,
+		Timeout: qc.Timeout,
 	}
 
 	resp, err := httpClient.Post(
-		quickChartURL,
+		endpoint,
 		"application/json",
 		bytes.NewBuffer(jsonEncodedPayload),
 	)
@@ -152,23 +150,11 @@ func (qc *QuickChart) ToByteArray() ([]byte, error) {
 		return nil, fmt.Errorf("response error: %d", resp.StatusCode)
 	}
 
-	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	return body, nil
-
+	return resp.Body, nil
 }
 
-func (qc *QuickChart) ToFile(filePath string) error {
+func (qc *QuickChart) validateConfig() bool {
 
-	rawFile, err := qc.ToByteArray()
-	if err != nil {
-		return err
-	}
-
-	return ioutil.WriteFile(filePath, rawFile, 0660)
+	return len(qc.Config) != 0
 
 }
