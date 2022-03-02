@@ -147,7 +147,7 @@ func (qc *QuickChart) makePostRequest(endpoint string) (io.ReadCloser, error) {
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("response error: %d", resp.StatusCode)
+		return nil, fmt.Errorf("response error: %d - %s", resp.StatusCode, resp.Header.Get("X-quickchart-error"))
 	}
 
 	return resp.Body, nil
