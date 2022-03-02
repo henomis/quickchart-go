@@ -12,14 +12,14 @@ import (
 	"time"
 )
 
-type QuickChart struct {
+type Chart struct {
 	Width             int64   `json:"width"`
 	Height            int64   `json:"height"`
 	DevicePixelRation float64 `json:"devicePixelRatio"`
 	Format            string  `json:"format"`
 	BackgroundColor   string  `json:"backgroundColor"`
 	Key               string  `json:"key"`
-	Version           string  `json:"version"`
+	Version           string  `json:"version,omitempty"`
 	Config            string  `json:"chart"`
 
 	Scheme  string        `json:"-"`
@@ -33,13 +33,13 @@ type getShortURLResponse struct {
 	URL     string `json:"url"`
 }
 
-func New() *QuickChart {
-	return &QuickChart{
+func New() *Chart {
+	return &Chart{
 		Width:             500,
 		Height:            300,
 		DevicePixelRation: 1.0,
 		Format:            "png",
-		BackgroundColor:   "transparent",
+		BackgroundColor:   "#ffffff",
 
 		Scheme:  "https",
 		Host:    "quickchart.io",
@@ -48,7 +48,7 @@ func New() *QuickChart {
 	}
 }
 
-func (qc *QuickChart) GetUrl() (string, error) {
+func (qc *Chart) GetUrl() (string, error) {
 
 	if !qc.validateConfig() {
 		return "", fmt.Errorf("invalid config")
@@ -75,7 +75,7 @@ func (qc *QuickChart) GetUrl() (string, error) {
 
 }
 
-func (qc *QuickChart) GetShortUrl() (string, error) {
+func (qc *Chart) GetShortUrl() (string, error) {
 
 	if !qc.validateConfig() {
 		return "", fmt.Errorf("invalid config")
@@ -108,7 +108,7 @@ func (qc *QuickChart) GetShortUrl() (string, error) {
 
 }
 
-func (qc *QuickChart) Write(output io.Writer) error {
+func (qc *Chart) Write(output io.Writer) error {
 
 	if !qc.validateConfig() {
 		return fmt.Errorf("invalid config")
@@ -126,7 +126,7 @@ func (qc *QuickChart) Write(output io.Writer) error {
 	return err
 }
 
-func (qc *QuickChart) makePostRequest(endpoint string) (io.ReadCloser, error) {
+func (qc *Chart) makePostRequest(endpoint string) (io.ReadCloser, error) {
 
 	jsonEncodedPayload, err := json.Marshal(qc)
 	if err != nil {
@@ -153,7 +153,7 @@ func (qc *QuickChart) makePostRequest(endpoint string) (io.ReadCloser, error) {
 	return resp.Body, nil
 }
 
-func (qc *QuickChart) validateConfig() bool {
+func (qc *Chart) validateConfig() bool {
 
 	return len(qc.Config) != 0
 

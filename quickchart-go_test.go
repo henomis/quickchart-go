@@ -46,7 +46,7 @@ func TestQuickChart_GetUrl(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			qc := &QuickChart{
+			qc := &Chart{
 				Width:             tt.fields.Width,
 				Height:            tt.fields.Height,
 				DevicePixelRation: tt.fields.DevicePixelRation,
