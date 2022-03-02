@@ -1,6 +1,6 @@
 # quickchart-go
 
-[![GoDoc](https://godoc.org/github.com/henomis/quickchart-go?status.svg)](https://godoc.org/github.com/henomis/quickchart-go)
+[![Build Status](https://github.com/henomis/quickchart-go/actions/workflows/test.yml/badge.svg?branch=main)](https://github.com/henomis/quickchart-go/actions/workflows/test.yml?query=branch%3Amain) [![GoDoc](https://godoc.org/github.com/henomis/quickchart-go?status.svg)](https://godoc.org/github.com/henomis/quickchart-go)
 
 Go client for the [quickchart.io](https://quickchart.io/) chart API.
 
