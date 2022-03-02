@@ -1,6 +1,6 @@
 # quickchart-go
 
-[![GoDoc](https://godoc.org/github.com/jordan-wright/email?status.svg)](https://godoc.org/github.com/jordan-wright/email)
+[![GoDoc](https://godoc.org/github.com/henomis/quickchart-go?status.svg)](https://godoc.org/github.com/henomis/quickchart-go)
 
 Go client for the [quickchart.io](https://quickchart.io/) chart API.
 
