@@ -12,17 +12,6 @@ import (
 
 func main() {
 
-	// chartConfig := `{
-	// 	type: 'bar',
-	// 	data: {
-	// 		labels: ['Q1', 'Q2', 'Q3', 'Q4'],
-	// 		datasets: [{
-	// 		label: 'Users',
-	// 		data: [50, 60, 70, 180]
-	// 		}]
-	// 	}
-	// }`
-
 	file, _ := os.Open("data.csv")
 	output, _ := buildJSONDataFromCSV(file)
 
@@ -45,14 +34,6 @@ func main() {
 }
 
 func buildJSONDataFromCSV(input io.Reader) (string, error) {
-
-	// data: {
-	// 	labels: ['Q1', 'Q2', 'Q3', 'Q4'],
-	// 	datasets: [{
-	// 	label: 'Users',
-	// 	data: [50, 60, 70, 180]
-	// 	}]
-	// }
 
 	records, err := importCSV(input)
 	if err != nil {
