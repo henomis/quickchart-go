@@ -90,6 +90,24 @@ API key (not required)
 
 ---
 
+### Network parameters
+
+You can set the following properties:
+
+#### Host: string
+The API host. Defaults to "quickchart.io".
+
+#### Scheme: string
+The API host scheme. Defaults to "https".
+
+#### Port: int64
+The API host port. Defaults to 443.
+
+#### Timeout: time.Duration
+The HTTP timeout. Defaults to 10 * time.Second
+
+---
+
 ### Creating chart URLs
 
 There are a few ways to get a URL for your chart object.
